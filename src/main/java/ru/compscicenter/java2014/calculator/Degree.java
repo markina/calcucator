@@ -10,7 +10,13 @@ public class Degree extends BinaryOperation {
 
   @Override
   public double result() {
-    return Math.pow(left.result(), right.result());
+    double l = left.result();
+    double r = right.result();
+    if(r >= 0) {
+      return Math.pow(left.result(), right.result());
+    } else {
+      return 1.0/(Math.pow(l, (-1)*r));
+    }
   }
 
   @Override

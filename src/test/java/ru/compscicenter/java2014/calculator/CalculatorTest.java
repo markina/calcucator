@@ -11,10 +11,10 @@ import org.junit.Test;
 public class CalculatorTest {
 
   Calculator calculator;
-  
+
   @Before
   public void setup() {
-    calculator= new CalculatorImpl();
+    calculator = new CalculatorImpl();
   }
 
   @Test
@@ -73,27 +73,39 @@ public class CalculatorTest {
     Assert.assertTrue(calculator.calculate("-Abs(1E+1^2 + 20/ 2)") == -110);
     Assert.assertTrue(calculator.calculate("1E+1") == 1E+1);
     Assert.assertTrue(calculator.calculate("-1E+22-213+234*45") == -1E+22 - 213 + 234 * 45);
-    Assert.assertTrue(calculator.calculate("-1E+22-21E-12+45E-12") == -1E+22-21E-12+45E-12);
+    Assert.assertTrue(calculator.calculate("-1E+22-21E-12+45E-12") == -1E+22 - 21E-12 + 45E-12);
   }
 
   @Test
   public void negativeUnarySignTest() {
     Assert.assertTrue(calculator.calculate("-(7)") == -7);
-    Assert.assertTrue(calculator.calculate("-(7)*(-6)*(-1)") == -(7)*(-6)*(-1));
-    Assert.assertTrue(calculator.calculate("1-(7)*(-6)*(-1)") == 1-(7)*(-6)*(-1));
+    Assert.assertTrue(calculator.calculate("-(7)*(-6)*(-1)") == -(7) * (-6) * (-1));
+    Assert.assertTrue(calculator.calculate("1-(7)*(-6)*(-1)") == 1 - (7) * (-6) * (-1));
+    Assert.assertTrue(calculator.calculate("(-7)^2") == 49);
+    Assert.assertTrue(calculator.calculate("+(-7)^2") == 49);
+    Assert.assertTrue(calculator.calculate("(12E-2)^2") == Math.pow(12E-2, 2));
   }
 
   @Test
   public void powerTest() {
-    Assert.assertTrue(calculator.calculate("-45^(-1)") == Math.pow(-45,(-1)));
+    Assert.assertTrue(calculator.calculate("-45^(-1)") == Math.pow(-45, (-1)));
     Assert.assertTrue(calculator.calculate("-2^(2)") == -Math.pow(2, (2)));
+    Assert.assertTrue(calculator.calculate("(-2)^10") == Math.pow(2, 10));
+
+    Assert.assertTrue(calculator.calculate("2^(0.2)") == Math.pow(2, 0.2));
+    Assert.assertTrue(calculator.calculate("(-2)^5") == -Math.pow(2, 5));
+    Assert.assertTrue(calculator.calculate("2^(-2)") == 1.0 / 4);
+    Assert.assertTrue(calculator.calculate("16^(0.5)") == 4);
+
+    Assert.assertTrue(calculator.calculate("25^(0.5)") == 5);
+    Assert.assertTrue(calculator.calculate("0.04^(0.5)") == 0.2);
+    Assert.assertTrue(calculator.calculate("23^0") == 1);
   }
 
   @Test
   public void currentTest() {
 
   }
-
 
 
 }
