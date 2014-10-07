@@ -6,9 +6,9 @@ package ru.compscicenter.java2014.calculator;
 
 /**
  * Exp <- Sum
- * Sum <- Product (('+' | '-') Product)*
- * Product <- Degree (('*' | '/') Degree)*
- * Degree <- Exp ('^' Exp)*
+ * Sum <- Product | Exp (('+' | '-') Exp)*
+ * Product <- Degree | Exp (('*' | '/') Exp)*
+ * Degree <- Value | Exp ('^' Exp)*
  * Value <- [0-9E+-]+ | '(' Exp ')' | 'cos(' Exp ') | 'sin(' Exp ') | 'abs(' Exp ')
  */
 
@@ -83,13 +83,13 @@ public class Parser {
         if (s.charAt(i) == '*') {
           leftString = s.substring(0, i);
           rightString = s.substring(i + 1, s.length());
-          exp = new Multiplication(parseDegree(leftString), parseDegree(rightString));
+          exp = new Multiplication(parseExp(leftString), parseExp(rightString));
           return exp;
         }
         if (s.charAt(i) == '/') {
           leftString = s.substring(0, i);
           rightString = s.substring(i + 1, s.length());
-          exp = new Division(parseDegree(leftString), parseDegree(rightString));
+          exp = new Division(parseExp(leftString), parseExp(rightString));
           return exp;
         }
 
