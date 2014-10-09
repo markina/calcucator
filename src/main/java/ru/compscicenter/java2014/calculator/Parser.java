@@ -8,17 +8,20 @@ package ru.compscicenter.java2014.calculator;
  * Exp <- Sum
  * Sum <- Product | Exp (('+' | '-') Exp)*
  * Product <- Degree | Exp (('*' | '/') Exp)*
- * Degree <- Value | Exp ('^' Exp)*
+ * Degree <- '-' Exp | '+' Exp | Value | Exp ('^' Exp)*
  * Value <- [0-9E+-]+ | '(' Exp ')' | 'cos(' Exp ') | 'sin(' Exp ') | 'abs(' Exp ')
  */
 
 
 public class Parser {
+
   public static Expression parseExp(String s) {
     Expression exp;
     int bal = 0;
     String leftString;
     String rightString;
+
+
     for (int i = s.length() - 1; i >= 0; i--) {
       if (s.charAt(i) == '(') {
         bal++;
@@ -29,24 +32,22 @@ public class Parser {
         continue;
       }
       if (bal == 0) {
-        if (s.charAt(i) == '+') {
+        if (isPlusOrMinus(s.charAt(i))) {
           if (isValueWithE(i, s)) {
             continue;
           }
           leftString = s.substring(0, i);
           rightString = s.substring(i + 1, s.length());
-          exp = new Plus(parseExp(leftString), parseExp(rightString));
-          return exp;
-        }
-        if (s.charAt(i) == '-') {
-          if (isValueWithE(i, s)) {
-            continue;
+          if (i != 0 && !isPlusOrMinus(leftString.charAt(leftString.length() - 1))) {
+            if (s.charAt(i) == '+') {
+              exp = new Plus(parseExp(leftString), parseExp(rightString));
+            } else {
+              exp = new Minus(parseExp(leftString), parseExp(rightString));
+            }
+            return exp;
           }
-          leftString = s.substring(0, i);
-          rightString = s.substring(i + 1, s.length());
-          exp = new Minus(parseExp(leftString), parseExp(rightString));
-          return exp;
         }
+
       }
     }
 
@@ -54,18 +55,7 @@ public class Parser {
     return exp;
   }
 
-  private static boolean isValueWithE(int position, String s) {
-    if (position != 0) {
-      if (s.charAt(position - 1) == 'E' || s.charAt(position - 1) == 'e') {
-        return true;
-      }
-    } else {
-      return false;
-    }
-    return false;
-  }
-
-  public static Expression parseProduct(String s) {
+  private static Expression parseProduct(String s) {
     Expression exp;
     int bal = 0;
     String leftString;
@@ -80,16 +70,14 @@ public class Parser {
         continue;
       }
       if (bal == 0) {
-        if (s.charAt(i) == '*') {
+        if (isMultiplicationOrDivision(s.charAt(i))) {
           leftString = s.substring(0, i);
           rightString = s.substring(i + 1, s.length());
-          exp = new Multiplication(parseExp(leftString), parseExp(rightString));
-          return exp;
-        }
-        if (s.charAt(i) == '/') {
-          leftString = s.substring(0, i);
-          rightString = s.substring(i + 1, s.length());
-          exp = new Division(parseExp(leftString), parseExp(rightString));
+          if (s.charAt(i) == '*') {
+            exp = new Multiplication(parseExp(leftString), parseExp(rightString));
+          } else {
+            exp = new Division(parseExp(leftString), parseExp(rightString));
+          }
           return exp;
         }
 
@@ -106,6 +94,16 @@ public class Parser {
     int bal = 0;
     String leftString;
     String rightString;
+
+    if (s.length() > 0 && s.charAt(0) == '+') {
+      return parseExp(s.substring(1, s.length()));
+    }
+
+    if (s.length() > 0 && s.charAt(0) == '-') {
+      return new UnaryMinus(parseExp(s.substring(1, s.length())));
+    }
+
+
     for (int i = 0; i < s.length(); i++) {
       if (s.charAt(i) == '(') {
         bal++;
@@ -119,7 +117,7 @@ public class Parser {
         if (s.charAt(i) == '^') {
           leftString = s.substring(0, i);
           rightString = s.substring(i + 1, s.length());
-          exp = new Degree(parseExp(leftString), parseExp(rightString));
+          exp = new Power(parseExp(leftString), parseExp(rightString));
           return exp;
         }
 
@@ -129,25 +127,42 @@ public class Parser {
     return exp;
   }
 
-
-  public static Expression parseValue(String s) {
+  private static Expression parseValue(String s) {
     if (s.length() > 0 && s.charAt(0) == '(' && s.charAt(s.length() - 1) == ')') {
       return parseExp(s.substring(1, s.length() - 1));
     }
 
+    if (s.length() >= 3) {
+      String first3Chars = s.substring(0, 3);
 
-    if (s.length() >= 3 && s.substring(0, 3).equalsIgnoreCase("cos")) {
-      return new Cos(parseExp(s.substring(3, s.length())));
+      if (first3Chars.equalsIgnoreCase("cos")) {
+        return new Cos(parseExp(s.substring(3, s.length())));
+      }
+
+      if (first3Chars.equalsIgnoreCase("sin")) {
+        return new Sin(parseExp(s.substring(3, s.length())));
+      }
+
+      if (first3Chars.equalsIgnoreCase("abs")) {
+        return new Abs(parseExp(s.substring(3, s.length())));
+      }
     }
-
-    if (s.length() >= 3 && s.substring(0, 3).equalsIgnoreCase("sin")) {
-      return new Sin(parseExp(s.substring(3, s.length())));
-    }
-
-    if (s.length() >= 3 && s.substring(0, 3).equalsIgnoreCase("abs")) {
-      return new Abs(parseExp(s.substring(3, s.length())));
-    }
-
     return new Value(s);
+  }
+
+  private static boolean isPlusOrMinus(char c) {
+    return c == '+' || c == '-';
+  }
+
+  private static boolean isMultiplicationOrDivision(char c) {
+    return c == '*' || c == '/';
+  }
+
+  private static boolean isValueWithE(int position, String s) {
+    return position != 0 && isE(s.charAt(position - 1));
+  }
+
+  private static boolean isE(char c) {
+    return c == 'E' || c == 'e';
   }
 }
