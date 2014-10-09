@@ -38,7 +38,7 @@ public class Parser extends Const {
           }
           leftString = s.substring(0, i);
           rightString = s.substring(i + 1, s.length());
-          if (i != 0 && !isPlusOrMinus(leftString.charAt(leftString.length() - 1))) {
+          if (i != 0 && !isArithmeticSign(leftString.charAt(leftString.length() - 1))) {
             if (s.charAt(i) == PLUS) {
               expression = new Plus(parseExpression(leftString), parseExpression(rightString));
             } else {
@@ -53,6 +53,10 @@ public class Parser extends Const {
 
     expression = parseProduct(s);
     return expression;
+  }
+
+  private static boolean isArithmeticSign(char c) {
+    return c == POWER || c == MULTIPLICATION || c == DIVISION || c == PLUS || c == MINUS;
   }
 
   private static Expression parseProduct(String s) {

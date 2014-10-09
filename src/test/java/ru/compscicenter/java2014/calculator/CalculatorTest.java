@@ -139,6 +139,19 @@ public class CalculatorTest {
     Assert.assertTrue(calculator.calculate("--+++-++-++----4-3") == 1);
     Assert.assertTrue(calculator.calculate("--2^2") == 4);
     Assert.assertTrue(calculator.calculate("---3---4") == (-3)-(4));
+    Assert.assertTrue(calculator.calculate("2*-3") == -6);
+  }
+
+  @Test
+  public void power2Test() {
+    Assert.assertTrue(calculator.calculate("0^3") == 0);
+    Assert.assertTrue(calculator.calculate("0^4.5") == 0);
+    Assert.assertTrue(calculator.calculate("0^0") == 1);
+    Assert.assertTrue(calculator.calculate("0^0") == 1);
+    Assert.assertTrue(calculator.calculate("-3^0") == -1);
+    Assert.assertTrue(calculator.calculate("0^5") == 0);
+    Assert.assertTrue(calculator.calculate("2^-2") == 0.25);
+
 
   }
 
