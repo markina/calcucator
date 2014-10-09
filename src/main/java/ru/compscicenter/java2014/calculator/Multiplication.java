@@ -10,8 +10,8 @@ public class Multiplication extends BinaryOperation {
   }
 
   @Override
-  protected String getString() {
-    return "*";
+  protected char getString() {
+    return MULTIPLICATION;
   }
 
   @Override

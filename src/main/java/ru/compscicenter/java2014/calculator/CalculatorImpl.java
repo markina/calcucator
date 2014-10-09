@@ -7,7 +7,7 @@ package ru.compscicenter.java2014.calculator;
 public class CalculatorImpl implements Calculator {
   public double calculate(String expression) {
     expression = expression.replaceAll("\\s+", "");
-    Expression exp = Parser.parseExp(expression);
+    Expression exp = Parser.parseExpression(expression);
     return exp.result();
   }
 

@@ -14,7 +14,7 @@ public class Power extends BinaryOperation {
   }
 
   @Override
-  protected String getString() {
-    return "^";
+  protected char getString() {
+    return POWER;
   }
 }

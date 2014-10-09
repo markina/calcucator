@@ -14,7 +14,7 @@ public class Division extends BinaryOperation {
   }
 
   @Override
-  protected String getString() {
-    return "/";
+  protected char getString() {
+    return DIVISION;
   }
 }

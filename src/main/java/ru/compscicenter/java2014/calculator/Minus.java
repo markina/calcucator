@@ -14,8 +14,8 @@ public class Minus extends BinaryOperation {
   }
 
   @Override
-  protected String getString() {
-    return "-";
+  protected char getString() {
+    return MINUS;
   }
 
 

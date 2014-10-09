@@ -6,17 +6,17 @@ package ru.compscicenter.java2014.calculator;
 
 public abstract class UnaryOperation extends Expression {
 
-  protected Expression e;
+  protected Expression expression;
 
-  public UnaryOperation(Expression e) {
-    this.e = e;
+  public UnaryOperation(Expression expression) {
+    this.expression = expression;
   }
 
   protected abstract String getString();
 
   @Override
   public String toString() {
-    return getString();
+    return getString() + LEFT_BRACKET + expression.toString() + RIGHT_BRACKET;
   }
 
 

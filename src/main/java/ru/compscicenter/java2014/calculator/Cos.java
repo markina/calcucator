@@ -10,16 +10,12 @@ public class Cos extends UnaryOperation {
 
   @Override
   protected String getString() {
-    return "cos";
+    return COS;
   }
 
   @Override
   public double result() {
-    return Math.cos(e.result());
+    return Math.cos(expression.result());
   }
 
-  @Override
-  public String toString() {
-    return "cos(" + e.toString() + ")";
-  }
 }

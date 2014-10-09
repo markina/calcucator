@@ -5,29 +5,29 @@ package ru.compscicenter.java2014.calculator;
  */
 
 /**
- * Exp <- Sum
+ * Expression <- Sum
  * Sum <- Product | Exp (('+' | '-') Exp)*
- * Product <- Degree | Exp (('*' | '/') Exp)*
- * Degree <- '-' Exp | '+' Exp | Value | Exp ('^' Exp)*
+ * Product <- Power | Exp (('*' | '/') Exp)*
+ * Power <- '-' Exp | '+' Exp | Value | Exp ('^' Exp)*
  * Value <- [0-9E+-]+ | '(' Exp ')' | 'cos(' Exp ') | 'sin(' Exp ') | 'abs(' Exp ')
  */
 
 
-public class Parser {
+public class Parser extends Сonstants {
 
-  public static Expression parseExp(String s) {
-    Expression exp;
+  public static Expression parseExpression(String s) {
+    Expression expression;
     int bal = 0;
     String leftString;
     String rightString;
 
 
     for (int i = s.length() - 1; i >= 0; i--) {
-      if (s.charAt(i) == '(') {
+      if (s.charAt(i) == LEFT_BRACKET) {
         bal++;
         continue;
       }
-      if (s.charAt(i) == ')') {
+      if (s.charAt(i) == RIGHT_BRACKET) {
         bal--;
         continue;
       }
@@ -39,33 +39,33 @@ public class Parser {
           leftString = s.substring(0, i);
           rightString = s.substring(i + 1, s.length());
           if (i != 0 && !isPlusOrMinus(leftString.charAt(leftString.length() - 1))) {
-            if (s.charAt(i) == '+') {
-              exp = new Plus(parseExp(leftString), parseExp(rightString));
+            if (s.charAt(i) == PLUS) {
+              expression = new Plus(parseExpression(leftString), parseExpression(rightString));
             } else {
-              exp = new Minus(parseExp(leftString), parseExp(rightString));
+              expression = new Minus(parseExpression(leftString), parseExpression(rightString));
             }
-            return exp;
+            return expression;
           }
         }
 
       }
     }
 
-    exp = parseProduct(s);
-    return exp;
+    expression = parseProduct(s);
+    return expression;
   }
 
   private static Expression parseProduct(String s) {
-    Expression exp;
+    Expression expression;
     int bal = 0;
     String leftString;
     String rightString;
     for (int i = s.length() - 1; i >= 0; i--) {
-      if (s.charAt(i) == '(') {
+      if (s.charAt(i) == LEFT_BRACKET) {
         bal++;
         continue;
       }
-      if (s.charAt(i) == ')') {
+      if (s.charAt(i) == RIGHT_BRACKET) {
         bal--;
         continue;
       }
@@ -73,89 +73,103 @@ public class Parser {
         if (isMultiplicationOrDivision(s.charAt(i))) {
           leftString = s.substring(0, i);
           rightString = s.substring(i + 1, s.length());
-          if (s.charAt(i) == '*') {
-            exp = new Multiplication(parseExp(leftString), parseExp(rightString));
+          if (s.charAt(i) == MULTIPLICATION) {
+            expression = new Multiplication(parseExpression(leftString), parseExpression(rightString));
           } else {
-            exp = new Division(parseExp(leftString), parseExp(rightString));
+            expression = new Division(parseExpression(leftString), parseExpression(rightString));
           }
-          return exp;
+          return expression;
         }
 
       }
     }
 
-    exp = parseDegree(s);
-    return exp;
+    expression = parsePower(s);
+    return expression;
 
   }
 
-  private static Expression parseDegree(String s) {
-    Expression exp;
+  private static Expression parsePower(String s) {
+    Expression expression;
     int bal = 0;
     String leftString;
     String rightString;
 
-    if (s.length() > 0 && s.charAt(0) == '+') {
-      return parseExp(s.substring(1, s.length()));
-    }
+    if (s.length() > 0) {
+      if (s.charAt(0) == PLUS) {
+        return parseExpression(s.substring(1, s.length()));
+      }
 
-    if (s.length() > 0 && s.charAt(0) == '-') {
-      return new UnaryMinus(parseExp(s.substring(1, s.length())));
+      if (s.charAt(0) == MINUS) {
+        return new UnaryMinus(parseExpression(s.substring(1, s.length())));
+      }
     }
 
 
     for (int i = 0; i < s.length(); i++) {
-      if (s.charAt(i) == '(') {
+      if (s.charAt(i) == LEFT_BRACKET) {
         bal++;
         continue;
       }
-      if (s.charAt(i) == ')') {
+      if (s.charAt(i) == RIGHT_BRACKET) {
         bal--;
         continue;
       }
       if (bal == 0) {
-        if (s.charAt(i) == '^') {
+        if (s.charAt(i) == POWER) {
           leftString = s.substring(0, i);
           rightString = s.substring(i + 1, s.length());
-          exp = new Power(parseExp(leftString), parseExp(rightString));
-          return exp;
+          expression = new Power(parseExpression(leftString), parseExpression(rightString));
+          return expression;
         }
 
       }
     }
-    exp = parseValue(s);
-    return exp;
+    expression = parseValue(s);
+    return expression;
   }
 
   private static Expression parseValue(String s) {
-    if (s.length() > 0 && s.charAt(0) == '(' && s.charAt(s.length() - 1) == ')') {
-      return parseExp(s.substring(1, s.length() - 1));
+    if (s.length() > 0 && s.charAt(0) == LEFT_BRACKET && s.charAt(s.length() - 1) == RIGHT_BRACKET) {
+      return parseExpression(s.substring(1, s.length() - 1));
     }
 
     if (s.length() >= 3) {
       String first3Chars = s.substring(0, 3);
 
-      if (first3Chars.equalsIgnoreCase("cos")) {
-        return new Cos(parseExp(s.substring(3, s.length())));
+      if (isCos(first3Chars)) {
+        return new Cos(parseExpression(s.substring(3, s.length())));
       }
 
-      if (first3Chars.equalsIgnoreCase("sin")) {
-        return new Sin(parseExp(s.substring(3, s.length())));
+      if (isSin(first3Chars)) {
+        return new Sin(parseExpression(s.substring(3, s.length())));
       }
 
-      if (first3Chars.equalsIgnoreCase("abs")) {
-        return new Abs(parseExp(s.substring(3, s.length())));
+      if (isAbs(first3Chars)) {
+        return new Abs(parseExpression(s.substring(3, s.length())));
       }
     }
     return new Value(s);
   }
 
+  private static boolean isAbs(String s) {
+    return s.equalsIgnoreCase(ABS);
+  }
+
+  private static boolean isSin(String s) {
+    return s.equalsIgnoreCase(SIN);
+  }
+
+  private static boolean isCos(String s) {
+    return s.equalsIgnoreCase(COS);
+  }
+
   private static boolean isPlusOrMinus(char c) {
-    return c == '+' || c == '-';
+    return c == PLUS || c == MINUS;
   }
 
   private static boolean isMultiplicationOrDivision(char c) {
-    return c == '*' || c == '/';
+    return c == MULTIPLICATION || c == DIVISION;
   }
 
   private static boolean isValueWithE(int position, String s) {
@@ -163,6 +177,6 @@ public class Parser {
   }
 
   private static boolean isE(char c) {
-    return c == 'E' || c == 'e';
+    return c == SMALL_E || c == BIG_E;
   }
 }

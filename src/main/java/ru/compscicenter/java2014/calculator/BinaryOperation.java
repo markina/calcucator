@@ -14,11 +14,11 @@ public abstract class BinaryOperation extends Expression {
 
   @Override
   public String toString() {
-    return '(' + left.toString() + getString() + right.toString() + ')';
+    return LEFT_BRACKET + left.toString() + getString() + right.toString() + RIGHT_BRACKET;
   }
 
   public abstract double result();
 
-  protected abstract String getString();
+  protected abstract char getString();
 
 }
