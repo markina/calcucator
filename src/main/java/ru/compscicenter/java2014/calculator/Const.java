@@ -3,7 +3,7 @@ package ru.compscicenter.java2014.calculator;
 /**
  * Created by Markina Margarita on 09.10.14.
  */
-public class Constants {
+public class Const {
   public static final String SIN = "sin";
   public static final String COS = "cos";
   public static final String ABS = "abs";

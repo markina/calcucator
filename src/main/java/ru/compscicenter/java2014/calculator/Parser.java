@@ -13,7 +13,7 @@ package ru.compscicenter.java2014.calculator;
  */
 
 
-public class Parser extends Constants {
+public class Parser extends Const {
 
   public static Expression parseExpression(String s) {
     Expression expression;
