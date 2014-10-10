@@ -4,6 +4,9 @@ package ru.compscicenter.java2014.calculator;
  * Created by Markina Margarita on 05.10.14.
  */
 
+import ru.compscicenter.java2014.calculator.expressions.*;
+import ru.compscicenter.java2014.calculator.expressions.operation.*;
+
 /**
  * Expression <- Sum
  * Sum <- Product | Exp (('+' | '-') Exp)*
@@ -12,168 +15,210 @@ package ru.compscicenter.java2014.calculator;
  * Value <- [0-9E+-]+ | '(' Exp ')' | 'cos(' Exp ') | 'sin(' Exp ') | 'abs(' Exp ')
  */
 
+public class Parser {
 
-public class Parser extends Const {
-
-  public static Expression parseExpression(String s) {
+  public static Expression parseExpression(String expressionString) {
     Expression expression;
-    int bal = 0;
-    String leftString;
-    String rightString;
+    int balance = 0;
 
+    for (int i = expressionString.length() - 1; i >= 0; i--) {
+      balance = updateBalance(expressionString, i, balance);
 
-    for (int i = s.length() - 1; i >= 0; i--) {
-      if (s.charAt(i) == LEFT_BRACKET) {
-        bal++;
-        continue;
-      }
-      if (s.charAt(i) == RIGHT_BRACKET) {
-        bal--;
-        continue;
-      }
-      if (bal == 0) {
-        if (isPlusOrMinus(s.charAt(i))) {
-          if (isValueWithE(i, s)) {
-            continue;
-          }
-          leftString = s.substring(0, i);
-          rightString = s.substring(i + 1, s.length());
-          if (i != 0 && !isArithmeticSign(leftString.charAt(leftString.length() - 1))) {
-            if (s.charAt(i) == PLUS) {
-              expression = new Plus(parseExpression(leftString), parseExpression(rightString));
-            } else {
-              expression = new Minus(parseExpression(leftString), parseExpression(rightString));
-            }
-            return expression;
-          }
-        }
-
-      }
-    }
-
-    expression = parseProduct(s);
-    return expression;
-  }
-
-  private static boolean isArithmeticSign(char c) {
-    return c == POWER || c == MULTIPLICATION || c == DIVISION || c == PLUS || c == MINUS;
-  }
-
-  private static Expression parseProduct(String s) {
-    Expression expression;
-    int bal = 0;
-    String leftString;
-    String rightString;
-    for (int i = s.length() - 1; i >= 0; i--) {
-      if (s.charAt(i) == LEFT_BRACKET) {
-        bal++;
-        continue;
-      }
-      if (s.charAt(i) == RIGHT_BRACKET) {
-        bal--;
-        continue;
-      }
-      if (bal == 0) {
-        if (isMultiplicationOrDivision(s.charAt(i))) {
-          leftString = s.substring(0, i);
-          rightString = s.substring(i + 1, s.length());
-          if (s.charAt(i) == MULTIPLICATION) {
-            expression = new Multiplication(parseExpression(leftString), parseExpression(rightString));
-          } else {
-            expression = new Division(parseExpression(leftString), parseExpression(rightString));
-          }
+      if (balance == 0) {
+        expression = getExpressionPlusOrMinusOrNull(expressionString, i);
+        if (isNotNull(expression)) {
           return expression;
         }
-
       }
     }
-
-    expression = parsePower(s);
+    expression = parseProduct(expressionString);
     return expression;
-
   }
 
-  private static Expression parsePower(String s) {
+  private static Expression parseProduct(String expressionString) {
     Expression expression;
-    int bal = 0;
-    String leftString;
-    String rightString;
+    int balance = 0;
 
-    if (s.length() > 0) {
-      if (s.charAt(0) == PLUS) {
-        return parseExpression(s.substring(1, s.length()));
-      }
+    for (int i = expressionString.length() - 1; i >= 0; i--) {
+      balance = updateBalance(expressionString, i, balance);
 
-      if (s.charAt(0) == MINUS) {
-        return new UnaryMinus(parseExpression(s.substring(1, s.length())));
-      }
-    }
-
-
-    for (int i = 0; i < s.length(); i++) {
-      if (s.charAt(i) == LEFT_BRACKET) {
-        bal++;
-        continue;
-      }
-      if (s.charAt(i) == RIGHT_BRACKET) {
-        bal--;
-        continue;
-      }
-      if (bal == 0) {
-        if (s.charAt(i) == POWER) {
-          leftString = s.substring(0, i);
-          rightString = s.substring(i + 1, s.length());
-          expression = new Power(parseExpression(leftString), parseExpression(rightString));
+      if (balance == 0) {
+        expression = getExpressionMultiplicationOrDivisionOrNull(expressionString, i);
+        if (isNotNull(expression)) {
           return expression;
         }
-
       }
     }
-    expression = parseValue(s);
+    expression = parsePower(expressionString);
     return expression;
   }
 
-  private static Expression parseValue(String s) {
-    if (s.length() > 0 && s.charAt(0) == LEFT_BRACKET && s.charAt(s.length() - 1) == RIGHT_BRACKET) {
-      return parseExpression(s.substring(1, s.length() - 1));
+  private static Expression parsePower(String expressionString) {
+    Expression expression;
+    expression = getExpressionUnaryPlusOrUnaryMinusOrNull(expressionString);
+    if (isNotNull(expression)) {
+      return expression;
     }
 
-    if (s.length() >= 3) {
-      String first3Chars = s.substring(0, 3);
+    int balance = 0;
+    for (int i = 0; i < expressionString.length(); i++) {
+      balance = updateBalance(expressionString, i, balance);
+
+      if (balance == 0) {
+        expression = getExpressionPowerOrNull(expressionString, i);
+        if (isNotNull(expression)) {
+          return expression;
+        }
+      }
+    }
+    expression = parseValue(expressionString);
+    return expression;
+  }
+
+
+  private static Expression parseValue(String expressionString) {
+    Expression expression;
+    expression = getExpressionWithoutBracketsSidesOrNull(expressionString);
+    if (isNotNull(expression)) {
+      return expression;
+    }
+
+    expression = getExpressionCosOrSinOrAbsOrNull(expressionString);
+    if (isNotNull(expression)) {
+      return expression;
+    }
+
+    return new Value(expressionString);
+  }
+
+  private static int updateBalance(String expressionString, int position, int balance) {
+    if (expressionString.charAt(position) == Const.LEFT_BRACKET) {
+      balance++;
+    }
+    if (expressionString.charAt(position) == Const.RIGHT_BRACKET) {
+      balance--;
+    }
+    return balance;
+  }
+
+  private static Expression getExpressionMultiplicationOrDivisionOrNull(String expressionString, int position) {
+    if (isMultiplicationOrDivision(expressionString.charAt(position))) {
+
+      String leftString = BinaryOperation.getLeftImportantString(position, expressionString);
+      String rightString = BinaryOperation.getRightImportantString(position, expressionString);
+
+      if (expressionString.charAt(position) == Const.MULTIPLICATION) {
+        return new Multiplication(parseExpression(leftString), parseExpression(rightString));
+      } else {
+        return new Division(parseExpression(leftString), parseExpression(rightString));
+      }
+    }
+    return null;
+  }
+
+  private static Expression getExpressionPowerOrNull(String expressionString, int position) {
+    if (expressionString.charAt(position) == Const.POWER) {
+
+      String leftString = BinaryOperation.getLeftImportantString(position, expressionString);
+      String rightString = BinaryOperation.getRightImportantString(position, expressionString);
+
+      return new Power(parseExpression(leftString), parseExpression(rightString));
+    }
+    return null;
+  }
+
+  private static Expression getExpressionUnaryPlusOrUnaryMinusOrNull(String expressionString) {
+    if (expressionString.length() > 0) {
+      if (expressionString.charAt(0) == Const.PLUS) {
+        return new UnaryPlus(parseExpression(SignOperation.getImportantString(expressionString)));
+      }
+
+      if (expressionString.charAt(0) == Const.MINUS) {
+        return new UnaryMinus(parseExpression(SignOperation.getImportantString(expressionString)));
+      }
+    }
+    return null;
+  }
+
+  private static Expression getExpressionCosOrSinOrAbsOrNull(String expressionString) {
+    if (expressionString.length() >= 3) {
+
+      String first3Chars = expressionString.substring(0, 3);
+      String importantString = ThreeLetterOperation.getImportantString(expressionString);
 
       if (isCos(first3Chars)) {
-        return new Cos(parseExpression(s.substring(3, s.length())));
+        return new Cos(parseExpression(importantString));
       }
 
       if (isSin(first3Chars)) {
-        return new Sin(parseExpression(s.substring(3, s.length())));
+        return new Sin(parseExpression(importantString));
       }
 
       if (isAbs(first3Chars)) {
-        return new Abs(parseExpression(s.substring(3, s.length())));
+        return new Abs(parseExpression(importantString));
       }
     }
-    return new Value(s);
+    return null;
+  }
+
+  private static Expression getExpressionPlusOrMinusOrNull(String expressionString, int positionOperation) {
+    if (isPlusOrMinus(expressionString.charAt(positionOperation))) {
+      if (isValueWithE(positionOperation, expressionString)) {
+        return null;
+      }
+
+      String leftString = BinaryOperation.getLeftImportantString(positionOperation, expressionString);
+      String rightString = BinaryOperation.getRightImportantString(positionOperation, expressionString);
+
+      if (isLastSymbolArithmeticSign(leftString)) {
+        if (expressionString.charAt(positionOperation) == Const.PLUS) {
+          return new Plus(parseExpression(leftString), parseExpression(rightString));
+        } else {
+          return new Minus(parseExpression(leftString), parseExpression(rightString));
+        }
+      }
+    }
+    return null;
+  }
+
+  private static Expression getExpressionWithoutBracketsSidesOrNull(String expressionString) {
+    if (isExpressionInBracketsSides(expressionString)) {
+      String importantString = expressionString.substring(1, expressionString.length() - 1);
+      return parseExpression(importantString);
+    }
+    return null;
+  }
+
+  private static boolean isLastSymbolArithmeticSign(String leftString) {
+    return leftString.length() != 0 && !isArithmeticSign(leftString.charAt(leftString.length() - 1));
+  }
+
+  private static boolean isNotNull(Expression expression) {
+    return expression != null;
+  }
+
+  private static boolean isExpressionInBracketsSides(String expressionString) {
+    return expressionString.length() > 0 && expressionString.charAt(0) == Const.LEFT_BRACKET && expressionString.charAt(expressionString.length() - 1) == Const.RIGHT_BRACKET;
   }
 
   private static boolean isAbs(String s) {
-    return s.equalsIgnoreCase(ABS);
+    return s.equalsIgnoreCase(Const.ABS);
   }
 
   private static boolean isSin(String s) {
-    return s.equalsIgnoreCase(SIN);
+    return s.equalsIgnoreCase(Const.SIN);
   }
 
   private static boolean isCos(String s) {
-    return s.equalsIgnoreCase(COS);
+    return s.equalsIgnoreCase(Const.COS);
   }
 
   private static boolean isPlusOrMinus(char c) {
-    return c == PLUS || c == MINUS;
+    return c == Const.PLUS || c == Const.MINUS;
   }
 
   private static boolean isMultiplicationOrDivision(char c) {
-    return c == MULTIPLICATION || c == DIVISION;
+    return c == Const.MULTIPLICATION || c == Const.DIVISION;
   }
 
   private static boolean isValueWithE(int position, String s) {
@@ -181,6 +226,15 @@ public class Parser extends Const {
   }
 
   private static boolean isE(char c) {
-    return c == SMALL_E || c == BIG_E;
+    return c == Const.SMALL_E || c == Const.BIG_E;
   }
+
+  private static boolean isArithmeticSign(char c) {
+    return c == Const.POWER
+            || c == Const.MULTIPLICATION
+            || c == Const.DIVISION
+            || c == Const.PLUS
+            || c == Const.MINUS;
+  }
+
 }
