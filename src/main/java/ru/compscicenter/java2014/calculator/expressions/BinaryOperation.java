@@ -21,13 +21,6 @@ public abstract class BinaryOperation extends Expression {
 
   public abstract double result();
 
-  protected abstract char getString();
+  public abstract char getString();
 
-  public static String getLeftImportantString(int positionOperation, String expressionString) {
-    return expressionString.substring(0, positionOperation);
-  }
-
-  public static String getRightImportantString(int position, String expressionString) {
-    return expressionString.substring(position + 1, expressionString.length());
-  }
 }

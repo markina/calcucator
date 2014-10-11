@@ -14,7 +14,7 @@ public class Multiplication extends BinaryOperation {
   }
 
   @Override
-  protected char getString() {
+  public char getString() {
     return Const.MULTIPLICATION;
   }
 

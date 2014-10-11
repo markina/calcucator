@@ -14,7 +14,7 @@ public abstract class UnaryOperation extends Expression {
     this.expression = expression;
   }
 
-  protected abstract String getString();
+  public abstract String getString();
 
   @Override
   public String toString() {

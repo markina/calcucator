@@ -13,7 +13,7 @@ public class Plus extends BinaryOperation {
   }
 
   @Override
-  protected char getString() {
+  public char getString() {
     return Const.PLUS;
   }
 

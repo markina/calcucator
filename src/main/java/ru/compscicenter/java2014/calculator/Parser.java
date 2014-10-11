@@ -104,8 +104,8 @@ public class Parser {
   private static Expression getExpressionMultiplicationOrDivisionOrNull(String expressionString, int position) {
     if (isMultiplicationOrDivision(expressionString.charAt(position))) {
 
-      String leftString = BinaryOperation.getLeftImportantString(position, expressionString);
-      String rightString = BinaryOperation.getRightImportantString(position, expressionString);
+      String leftString = getLeftString(position, expressionString);
+      String rightString = getRightString(position, expressionString);
 
       if (expressionString.charAt(position) == Const.MULTIPLICATION) {
         return new Multiplication(parseExpression(leftString), parseExpression(rightString));
@@ -119,8 +119,8 @@ public class Parser {
   private static Expression getExpressionPowerOrNull(String expressionString, int position) {
     if (expressionString.charAt(position) == Const.POWER) {
 
-      String leftString = BinaryOperation.getLeftImportantString(position, expressionString);
-      String rightString = BinaryOperation.getRightImportantString(position, expressionString);
+      String leftString = getLeftString(position, expressionString);
+      String rightString = getRightString(position, expressionString);
 
       return new Power(parseExpression(leftString), parseExpression(rightString));
     }
@@ -130,35 +130,40 @@ public class Parser {
   private static Expression getExpressionUnaryPlusOrUnaryMinusOrNull(String expressionString) {
     if (expressionString.length() > 0) {
       if (expressionString.charAt(0) == Const.PLUS) {
-        return new UnaryPlus(parseExpression(SignOperation.getImportantString(expressionString)));
+        return new UnaryPlus(parseExpression(getStringWithoutFirstSymbol(expressionString)));
       }
 
       if (expressionString.charAt(0) == Const.MINUS) {
-        return new UnaryMinus(parseExpression(SignOperation.getImportantString(expressionString)));
+        return new UnaryMinus(parseExpression(getStringWithoutFirstSymbol(expressionString)));
       }
     }
     return null;
   }
 
   private static Expression getExpressionCosOrSinOrAbsOrNull(String expressionString) {
-    if (expressionString.length() >= 3) {
 
-      String first3Chars = expressionString.substring(0, 3);
-      String importantString = ThreeLetterOperation.getImportantString(expressionString);
+    if(startsWithIgnoreCase(expressionString, Const.COS)) {
+      return new Cos(parseExpression(expressionString.substring(Const.COS.length())));
+    }
 
-      if (isCos(first3Chars)) {
-        return new Cos(parseExpression(importantString));
-      }
+    if(startsWithIgnoreCase(expressionString, Const.SIN)) {
+      return new Sin(parseExpression(expressionString.substring(Const.SIN.length())));
+    }
 
-      if (isSin(first3Chars)) {
-        return new Sin(parseExpression(importantString));
-      }
+    if(startsWithIgnoreCase(expressionString, Const.ABS)) {
+      return new Abs(parseExpression(expressionString.substring(Const.ABS.length())));
+    }
 
-      if (isAbs(first3Chars)) {
-        return new Abs(parseExpression(importantString));
+    return null;
+  }
+
+  private static boolean startsWithIgnoreCase(String expressionString, String pattern) {
+    if(expressionString.length() >= pattern.length()) {
+      if(expressionString.substring(0, pattern.length()).equalsIgnoreCase(pattern)) {
+        return true;
       }
     }
-    return null;
+    return false;
   }
 
   private static Expression getExpressionPlusOrMinusOrNull(String expressionString, int positionOperation) {
@@ -167,8 +172,8 @@ public class Parser {
         return null;
       }
 
-      String leftString = BinaryOperation.getLeftImportantString(positionOperation, expressionString);
-      String rightString = BinaryOperation.getRightImportantString(positionOperation, expressionString);
+      String leftString = getLeftString(positionOperation, expressionString);
+      String rightString = getRightString(positionOperation, expressionString);
 
       if (isLastSymbolArithmeticSign(leftString)) {
         if (expressionString.charAt(positionOperation) == Const.PLUS) {
@@ -181,10 +186,22 @@ public class Parser {
     return null;
   }
 
+  private static String getStringWithoutFirstSymbol(String expressionString) {
+    return expressionString.substring(1, expressionString.length());
+  }
+
+  public static String getLeftString(int positionOperation, String expressionString) {
+    return expressionString.substring(0, positionOperation);
+  }
+
+  public static String getRightString(int position, String expressionString) {
+    return expressionString.substring(position + 1, expressionString.length());
+  }
+
   private static Expression getExpressionWithoutBracketsSidesOrNull(String expressionString) {
     if (isExpressionInBracketsSides(expressionString)) {
-      String importantString = expressionString.substring(1, expressionString.length() - 1);
-      return parseExpression(importantString);
+      String stringwithoutBrackets = expressionString.substring(1, expressionString.length() - 1);
+      return parseExpression(stringwithoutBrackets);
     }
     return null;
   }
@@ -199,18 +216,6 @@ public class Parser {
 
   private static boolean isExpressionInBracketsSides(String expressionString) {
     return expressionString.length() > 0 && expressionString.charAt(0) == Const.LEFT_BRACKET && expressionString.charAt(expressionString.length() - 1) == Const.RIGHT_BRACKET;
-  }
-
-  private static boolean isAbs(String s) {
-    return s.equalsIgnoreCase(Const.ABS);
-  }
-
-  private static boolean isSin(String s) {
-    return s.equalsIgnoreCase(Const.SIN);
-  }
-
-  private static boolean isCos(String s) {
-    return s.equalsIgnoreCase(Const.COS);
   }
 
   private static boolean isPlusOrMinus(char c) {

@@ -18,7 +18,7 @@ public class Minus extends BinaryOperation {
   }
 
   @Override
-  protected char getString() {
+  public char getString() {
     return Const.MINUS;
   }
 

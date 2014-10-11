@@ -18,7 +18,7 @@ public class Power extends BinaryOperation {
   }
 
   @Override
-  protected char getString() {
+  public char getString() {
     return Const.POWER;
   }
 }

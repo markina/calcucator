@@ -2,18 +2,18 @@ package ru.compscicenter.java2014.calculator.expressions.operation;
 
 import ru.compscicenter.java2014.calculator.Const;
 import ru.compscicenter.java2014.calculator.expressions.Expression;
-import ru.compscicenter.java2014.calculator.expressions.ThreeLetterOperation;
+import ru.compscicenter.java2014.calculator.expressions.UnaryOperation;
 
 /**
  * Created by Markina Margarita on 05.10.14.
  */
-public class Sin extends ThreeLetterOperation {
+public class Sin extends UnaryOperation {
   public Sin(Expression expression) {
     super(expression);
   }
 
   @Override
-  protected String getString() {
+  public String getString() {
     return Const.SIN;
   }
 
